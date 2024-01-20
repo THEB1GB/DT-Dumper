@@ -1,0 +1,39 @@
+name: Release Workflow
+
+on:
+  push:
+    branches:
+      - main  # Change to your main branch name
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Clone from GitLab
+        run: git clone https://dumps.tadiphone.dev/dumps/redmi/garnet.git
+
+      - name: Zip AOSP Device Tree
+        run: zip -r aosp-device-tree.zip aosp-device-tree
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
+          body: |
+            Changes in this release:
+            - Zip of AOSP Device Tree
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./aosp-device-tree.zip
+          asset_name: aosp-device-tree.zip
+          asset_content_type: application/zip
+          
